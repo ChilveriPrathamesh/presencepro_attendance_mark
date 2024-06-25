@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Unknown Photos</title>
+    <link rel="stylesheet" href="assets/upload.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Upload Unknown Images</h1>
+        <form id="uploadForm" action="/upload_unknown" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="className">Class Name:</label>
+                <input type="text" id="className" name="className" required>
+            </div>
+            <div class="form-group">
+                <label for="image">Choose Image:</label>
+                <input type="file" id="image" name="image" accept="image/*" required>
+            </div>
+            <button type="submit">Upload</button>
+        </form>
+        
+        <div id="uploadMessage" style="display: none; margin-top: 10px;">
+            <p id="uploadSuccessMessage" style="color: green;">Image uploaded successfully!</p>
+        </div>
+
+        <button id="redirectButton">Check Attendance</button>
+
+        <div>
+            <p>Display the images that are stored in the database</p>
+            <form id="displayForm" action="/display_unknown" method="POST">
+                <div class="form-group">
+                    <label for="displayClassName">Class Name:</label>
+                    <input type="text" id="displayClassName" name="className" required>
+                </div>
+                <button type="submit">Display</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const uploadForm = document.getElementById('uploadForm');
+            const uploadMessage = document.getElementById('uploadMessage');
+            const uploadSuccessMessage = document.getElementById('uploadSuccessMessage');
+
+            uploadForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                
+                const formData = new FormData(uploadForm);
+                const response = await fetch('/upload_unknown', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    // Show success message
+                    uploadMessage.style.display = 'block';
+                    setTimeout(() => {
+                        uploadMessage.style.display = 'none'; // Hide message after 2 seconds
+                    }, 2000); // 2000 milliseconds = 2 seconds
+                } else {
+                    // Handle error scenario
+                    console.error('Failed to upload image');
+                    alert('Failed to upload image');
+                }
+            });
+
+            document.getElementById("redirectButton").addEventListener("click", function() {
+                window.location.href = "/detect"; // Redirect to "/detect" route
+            });
+        });
+    </script>
+</body>
+</html>

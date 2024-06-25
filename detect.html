@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Recognition Attendance System</title>
+
+    <link rel="stylesheet" href="assets/detect.css">
+</head>
+<body>
+    <div class="bg-container">
+       
+            <h1 class= "detect-title">Face Recognition Attendance System</h1>
+            <div class="container">
+                <form id="markAttendanceForm">
+                    <label for="className">Class Name:</label>
+                    <input type="text" id="className" name="className" required>
+                    <button type="submit" id="markAttendanceButton">Mark Attendance</button>
+                </form>
+            
+                <br>
+            
+                <button id="downloadAttendance">Download Attendance</button>
+            </div>
+            <div id="message" class = "msg"></div>
+        
+        
+    </div>
+    
+
+    <script>
+        document.getElementById('markAttendanceForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const className = document.getElementById('className').value;
+
+            // Displaying the "Please wait" message
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = '<p>Attendance is being marked. Please wait...</p>';
+
+            try {
+                const response = await fetch('/mark_attendance', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ className })
+                });
+
+                if (!response.ok) {
+                    const message = await response.text();
+                    throw new Error(message);
+                }
+
+                const outputFileName = await response.text(); // Get the filename from server response
+                alert(`Attendance marked successfully. Excel file: ${outputFileName}`);
+            } catch (error) {
+                console.error('Error marking attendance:', error.message);
+                alert(error.message); // Display alert with error message
+            } finally {
+                // Clear the "Please wait" message after completion
+                messageDiv.innerHTML = '';
+            }
+        });
+
+        document.getElementById('downloadAttendance').addEventListener('click', async () => {
+            const className = document.getElementById('className').value; // Get className from input field
+            try {
+                const response = await fetch(`/download_attendance?className=${className}`);
+
+                if (!response.ok) {
+                    throw new Error('Failed to download attendance');
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                const currentDate = new Date().toISOString().slice(0, 10); // Get current date
+                a.download = `${className}_attendance_${currentDate}.xlsx`; // Set filename for download
+                a.href = url;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Error downloading attendance:', error.message);
+                alert('Failed to download attendance');
+            }
+        });
+    </script>
+</body>
+</html>

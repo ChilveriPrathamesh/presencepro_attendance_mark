@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Images</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            width: 300px;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload Image</h1>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="className">Class Name:</label>
+                <input type="text" id="className" name="className" required>
+            </div>
+            <div class="form-group">
+                <label for="fullName">Full Name:</label>
+                <input type="text" id="fullName" name="fullName" required>
+            </div>
+            <div class="form-group">
+                <label for="image">Upload Image:</label>
+                <input type="file" id="image" name="image" accept="image/*" required>
+            </div>
+            <button type="submit">Upload</button>
+        </form>
+        <div id="uploadMessage" style="display: none; margin-top: 10px;">
+            <p id="uploadSuccessMessage">Image uploaded successfully!</p>
+        </div>
+        <div>
+            <p>Display the images that are stored in the database</p>
+            <form id="displayForm" action="/display_known" method="POST">
+                <div class="form-group">
+                    <label for="displayClassName">Class Name:</label>
+                    <input type="text" id="displayClassName" name="className" required>
+                </div>
+                <button type="submit">Display</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const uploadForm = document.getElementById('uploadForm');
+            const uploadMessage = document.getElementById('uploadMessage');
+            const uploadSuccessMessage = document.getElementById('uploadSuccessMessage');
+
+            uploadForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                
+                const formData = new FormData(uploadForm);
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    // Show success message
+                    uploadMessage.style.display = 'block';
+                    uploadSuccessMessage.textContent = 'Image uploaded successfully!';
+
+                    // Clear input fields (optional)
+                    uploadForm.reset();
+
+                    // Hide success message after 3 seconds
+                    setTimeout(() => {
+                        uploadMessage.style.display = 'none';
+                    }, 3000);
+                } else {
+                    // Handle error scenario
+                    console.error('Failed to upload image');
+                    alert('Failed to upload image');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
