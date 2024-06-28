@@ -15,13 +15,14 @@ const { connect } = require('http2');
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json()); // Parse JSON bodies
+app.use(express.static(path.join(__dirname, 'public')));
 app.use("/assets", express.static("assets"));
 const upload = multer({ dest: 'uploads/' });
 
 const connection = mysql.createConnection({
-    host: "aws-attendance.cz608aw60ypw.eu-north-1.rds.amazonaws.com",
-    user: "admin",
-    password: "Pratham2807",
+    host: "localhost",
+    user: "root",
+    password: "Pratham2807@",
     database: "presencepro"
 });
 
@@ -89,212 +90,6 @@ app.post('/login', (req, res) => {
     });
 });
 
-// app.post('/upload', upload.single('image'), (req, res) => {
-//     const { className, fullName } = req.body;
-//     const { filename, path: filePath  } = req.file;
-//     const buffer = fs.readFileSync(filePath);
-
-
-//     // Ensure the base images directory exists
-//     const baseImagesDir = path.join(__dirname, 'images');
-//     if (!fs.existsSync(baseImagesDir)) {
-//         fs.mkdirSync(baseImagesDir, { recursive: true });
-//     }
-
-//     // Create directory for class if not exists
-//     const classDir = path.join(baseImagesDir, className);
-//     if (!fs.existsSync(classDir)) {
-//         fs.mkdirSync(classDir, { recursive: true });
-//     }
-
-//     // Move uploaded file to class directory
-//     const newPath = path.join(classDir, filename);
-//     fs.renameSync(filePath, newPath);
-
-//     // Check if the class name exists in the database
-//     connection.query('SELECT * FROM classes WHERE className = ?', [className], (err, results) => {
-//         if (err) throw err;
-
-//         if (results.length > 0) {
-//             // Class already exists
-//             // Insert the image into the database
-//             connection.query('INSERT INTO images (filename, filepath, className, fullName , imageDb) VALUES (?, ?, ?,?, ?)', [filename, newPath, className, fullName , buffer], (err, result) => {
-//                 if (err) throw err;
-//                 console.log('Image uploaded and database updated');
-//                 res.send('Image uploaded successfully');
-//             });
-//         } else {
-//             // Class does not exist, create a new entry
-//             connection.query('INSERT INTO classes (className) VALUES (?)', [className], (err, result) => {
-//                 if (err) {
-//                     console.error('Error inserting class into database: ', err);
-//                     res.status(500).send('Internal Server Error');
-//                     return;
-//                 }
-//                 connection.query('INSERT INTO images (filename, filepath, className, fullName , imageDb) VALUES (?, ?, ?,?, ?)', [filename, newPath, className, fullName , buffer], (err, result) => {
-//                     if (err) throw err;
-//                     console.log('Image uploaded, new class created, and database updated');
-//                    res.send('Image uploaded successfully');
-
-//                    // res.redirect('/detect');
-//                 });
-//             });
-//         }
-//     });
-// });
-
-
-
-// app.post('/display_known', (req, res) => {
-//     const { className } = req.body;
-
-//     connection.query('SELECT * FROM images WHERE className = ? ORDER BY fullName ASC', [className], (err, results) => {
-//         if (err) {
-//             console.error('Database query error:', err);
-//             return res.status(500).send('Internal Server Error');
-//         }
-
-//         let imageHtml = '';
-//         results.forEach((image) => {
-//             imageHtml += `<div class="image-item">
-//                 <h3>${image.fullName}</h3>
-//                 <img src="data:image/jpeg;base64,${Buffer.from(image.imageDb).toString('base64')}" alt="${image.filename}">
-//             </div>`;
-//         });
-
-//         res.send(`
-//             <!DOCTYPE html>
-//             <html lang="en">
-//             <head>
-//                 <meta charset="UTF-8">
-//                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-//                 <title>Images for Class: ${className}</title>
-//                 <style>
-//                     body {
-//                         font-family: Arial, sans-serif;
-//                         background-color: #f4f4f4;
-//                         margin: 0;
-//                         padding: 20px;
-//                     }
-//                     .image-container {
-//                         display: flex;
-//                         flex-wrap: wrap;
-//                         gap: 20px;
-//                         justify-content: center;
-//                     }
-//                     .image-item {
-//                         background: white;
-//                         padding: 10px;
-//                         border: 1px solid #ddd;
-//                         border-radius: 5px;
-//                         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-//                         text-align: center;
-//                         flex: 1 0 calc(20% - 40px); /* Adjust width to display 5 images per row */
-//                         box-sizing: border-box;
-//                         margin: 10px;
-//                     }
-//                     .image-item img {
-//                         max-width: 100%;
-//                         height: auto;
-//                         border-radius: 5px;
-//                     }
-//                     @media (max-width: 1200px) {
-//                         .image-item {
-//                             flex: 1 0 calc(25% - 40px); /* 4 images per row for medium screens */
-//                         }
-//                     }
-//                     @media (max-width: 900px) {
-//                         .image-item {
-//                             flex: 1 0 calc(33.33% - 40px); /* 3 images per row for small screens */
-//                         }
-//                     }
-//                     @media (max-width: 600px) {
-//                         .image-item {
-//                             flex: 1 0 calc(50% - 40px); /* 2 images per row for extra small screens */
-//                         }
-//                     }
-//                     @media (max-width: 400px) {
-//                         .image-item {
-//                             flex: 1 0 100%; /* 1 image per row for very small screens */
-//                         }
-//                     }
-//                 </style>
-//             </head>
-//             <body>
-//                 <h1>Images for Class: ${className}</h1>
-//                 <div class="image-container">
-//                     ${imageHtml}
-//                 </div>
-//             </body>
-//             </html>
-//         `);
-//     });
-// });
-
-// Display known images for a class
-
-// app.post('/upload', upload.single('image'), (req, res) => {
-//     const { className, fullName } = req.body;
-//     const { filename, path: filePath } = req.file;
-//     const buffer = fs.readFileSync(filePath);
-
-//     // Ensure the base images directory exists
-//     const baseImagesDir = path.join(__dirname, 'images');
-//     if (!fs.existsSync(baseImagesDir)) {
-//         fs.mkdirSync(baseImagesDir, { recursive: true });
-//     }
-
-//     // Create directory for class if not exists
-//     const classDir = path.join(baseImagesDir, className);
-//     if (!fs.existsSync(classDir)) {
-//         fs.mkdirSync(classDir, { recursive: true });
-//     }
-
-//     // Move uploaded file to class directory
-//     const newPath = path.join(classDir, filename);
-//     fs.renameSync(filePath, newPath);
-
-//     // Check if the class name exists in the database
-//     connection.query('SELECT * FROM classes WHERE className = ?', [className], (err, results) => {
-//         if (err) {
-//             console.error('Database query error:', err);
-//             return res.status(500).json({ status: 'error', message: 'Internal Server Error' });
-//         }
-
-//         if (results.length > 0) {
-//             // Class already exists
-//             // Insert the image into the database
-//             connection.query('INSERT INTO images (filename, filepath, className, fullName, imageDb) VALUES (?, ?, ?, ?, ?)', [filename, newPath, className, fullName, buffer], (err, result) => {
-//                 if (err) {
-//                     console.error('Error inserting image into database:', err);
-//                     return res.status(500).json({ status: 'error', message: 'Internal Server Error' });
-//                 }
-//                 console.log('Image uploaded and database updated');
-
-//                 // Send JSON response to client with success message
-//                 res.json({ status: 'success', message: 'Image uploaded successfully' });
-//             });
-//         } else {
-//             // Class does not exist, create a new entry
-//             connection.query('INSERT INTO classes (className) VALUES (?)', [className], (err, result) => {
-//                 if (err) {
-//                     console.error('Error inserting class into database: ', err);
-//                     return res.status(500).json({ status: 'error', message: 'Internal Server Error' });
-//                 }
-//                 connection.query('INSERT INTO images (filename, filepath, className, fullName, imageDb) VALUES (?, ?, ?, ?, ?)', [filename, newPath, className, fullName, buffer], (err, result) => {
-//                     if (err) {
-//                         console.error('Error inserting image into database:', err);
-//                         return res.status(500).json({ status: 'error', message: 'Internal Server Error' });
-//                     }
-//                     console.log('Image uploaded, new class created, and database updated');
-
-//                     // Send JSON response to client with success message
-//                     res.json({ status: 'success', message: 'Image uploaded successfully' });
-//                 });
-//             });
-//         }
-//     });
-// });
 
 app.post('/upload', upload.single('image'), (req, res) => {
     const { className, fullName } = req.body;
@@ -745,79 +540,16 @@ app.get('/download_attendance', (req, res) => {
 });
 
 
+
 app.get('/logout', (req, res) => {
     res.clearCookie('session');
     res.redirect('/');
 });
 
-// Dashboard rouacacte
+// Dashboard route
 app.get('/welcome', (req, res) => {
-    res.sendFile(path.join(__dirname, 'welcome.html'));
+    res.sendFile(path.join(__dirname, 'public', 'welcome.html'));
 });
-
-app.post('/upload', upload.single('image'), (req, res) => {
-    const { className, fullName } = req.body;
-    const { filename, path: filePath } = req.file;
-    const buffer = fs.readFileSync(filePath);
-
-    // Ensure the base images directory exists
-    const baseImagesDir = path.join(__dirname, 'images');
-    if (!fs.existsSync(baseImagesDir)) {
-        fs.mkdirSync(baseImagesDir, { recursive: true });
-    }
-
-    // Create directory for class if not exists
-    const classDir = path.join(baseImagesDir, className);
-    if (!fs.existsSync(classDir)) {
-        fs.mkdirSync(classDir, { recursive: true });
-    }
-
-    // Move uploaded file to class directory
-    const newPath = path.join(classDir, filename);
-    fs.renameSync(filePath, newPath);
-
-    // Check if the class name exists in the database
-    connection.query('SELECT * FROM classes WHERE className = ?', [className], (err, results) => {
-        if (err) {
-            console.error('Database query error:', err);
-            return res.status(500).json({ status: 'error', message: 'Internal Server Error' });
-        }
-
-        if (results.length > 0) {
-            // Class already exists
-            // Insert the image into the database
-            connection.query('INSERT INTO images (filename, filepath, className, fullName, imageDb) VALUES (?, ?, ?, ?, ?)', [filename, newPath, className, fullName, buffer], (err, result) => {
-                if (err) {
-                    console.error('Error inserting image into database:', err);
-                    return res.status(500).json({ status: 'error', message: 'Internal Server Error' });
-                }
-                console.log('Image uploaded and database updated');
-
-                // Send JSON response to client with success message
-                res.json({ status: 'success', message: 'Image uploaded successfully' });
-            });
-        } else {
-            // Class does not exist, create a new entry
-            connection.query('INSERT INTO classes (className) VALUES (?)', [className], (err, result) => {
-                if (err) {
-                    console.error('Error inserting class into database: ', err);
-                    return res.status(500).json({ status: 'error', message: 'Internal Server Error' });
-                }
-                connection.query('INSERT INTO images (filename, filepath, className, fullName, imageDb) VALUES (?, ?, ?, ?, ?)', [filename, newPath, className, fullName, buffer], (err, result) => {
-                    if (err) {
-                        console.error('Error inserting image into database:', err);
-                        return res.status(500).json({ status: 'error', message: 'Internal Server Error' });
-                    }
-                    console.log('Image uploaded, new class created, and database updated');
-
-                    // Send JSON response to client with success message
-                    res.json({ status: 'success', message: 'Image uploaded successfully' });
-                });
-            });
-        }
-    });
-});
-
 
 app.get('/redirect-to-detect', (req, res) => {
     res.redirect('/detect'); // Redirect to the "/detect" route
@@ -825,21 +557,21 @@ app.get('/redirect-to-detect', (req, res) => {
 
 // Route to serve the detection page
 app.get('/detect', (req, res) => {
-    res.sendFile(__dirname + '/detect.html');
+    res.sendFile(path.join(__dirname, 'public', 'detect.html'));
 });
-
 
 // Route for the upload page
 app.get('/upload', (req, res) => {
-    res.sendFile(path.join(__dirname, 'upload.html'));
+    res.sendFile(path.join(__dirname, 'public', 'upload.html'));
 });
 
 // Route for the check page
 app.get('/check', (req, res) => {
-    res.sendFile(path.join(__dirname, 'check.html'));
+    res.sendFile(path.join(__dirname, 'public', 'check.html'));
 });
 
+
 // Set app port
-app.listen(4500, () => {
-    console.log('Server is running on port 4500');
+app.listen(4600, () => {
+    console.log('Server is running on port 4600');
 });
