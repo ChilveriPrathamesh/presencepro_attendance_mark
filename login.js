@@ -20,9 +20,9 @@ app.use("/assets", express.static("assets"));
 const upload = multer({ dest: 'uploads/' });
 
 const connection = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "Pratham2807@",
+    host: "aws-attendance.cz608aw60ypw.eu-north-1.rds.amazonaws.com",
+    user: "admin",
+    password: "Pratham2807",
     database: "presencepro"
 });
 
